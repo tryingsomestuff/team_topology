@@ -1,0 +1,607 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactions entre équipes</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        .survey-form {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .team-selection {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .option {
+            background-color: #e0e0e0;
+            border: 2px solid #c0c0c0;
+            border-radius: 4px;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .option.selected {
+            background-color: #4CAF50;
+            color: white;
+            border-color: #388E3C;
+        }
+        button {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 15px;
+        }
+        button:hover {
+            background-color: #0b7dda;
+        }
+        .team-options {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .team-btn {
+            padding: 15px;
+            font-size: 18px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .team-btn:hover {
+            opacity: 0.9;
+        }
+        .ED { background-color: #1f77b4; color: white; }
+        .SOLV { background-color: #ff7f0e; color: white; }
+        .SIMU { background-color: #2ca02c; color: white; }
+        .SOFT { background-color: #d62728; color: white; }
+        .DATA { background-color: #9467bd; color: white; }
+        
+        .visualization {
+            margin-top: 50px;
+        }
+        #graph {
+            width: 100%;
+            height: 800px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .stats {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: opacity 0.5s;
+            opacity: 0;
+            z-index: 1000;
+        }
+        .notification.show {
+            opacity: 1;
+        }
+        .admin-panel {
+            margin-top: 50px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 8px;
+            border: 1px dashed #999;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .success-message {
+            color: #4CAF50;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 18px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Interactions entre équipes</h1>
+    
+    <div class="survey-form">
+        <h2>Avec quelles équipes discutez-vous au moins une fois par semaine?</h2>
+        
+        <div class="team-selection">
+            <p><strong>1. Sélectionnez VOTRE équipe :</strong></p>
+            <div class="team-options">
+                <div class="team-btn ED" onclick="selectTeam('ED')">ED</div>
+                <div class="team-btn SOLV" onclick="selectTeam('SOLV')">SOLV</div>
+                <div class="team-btn SIMU" onclick="selectTeam('SIMU')">SIMU</div>
+                <div class="team-btn SOFT" onclick="selectTeam('SOFT')">SOFT</div>
+                <div class="team-btn DATA" onclick="selectTeam('DATA')">DATA</div>
+            </div>
+        </div>
+        
+        <div id="connections-selection" style="display: none;">
+            <p><strong>2. Sélectionnez les équipes avec lesquelles vous interagissez régulièrement :</strong></p>
+            <div class="options" id="connection-options">
+                <!-- Sera rempli dynamiquement en fonction de l'équipe sélectionnée -->
+            </div>
+            
+            <button id="submit">Soumettre</button>
+        </div>
+        
+        <div id="success-message" class="success-message">
+            Votre vote a été enregistré. Merci pour votre participation!
+        </div>
+    </div>
+    
+    <div class="stats">
+        <h2>Résultats des interactions</h2>
+        <table id="connections-table">
+            <thead>
+                <tr>
+                    <th>Équipe</th>
+                    <th>ED</th>
+                    <th>SOLV</th>
+                    <th>SIMU</th>
+                    <th>SOFT</th>
+                    <th>DATA</th>
+                    <th>B2B</th>
+                    <th>B2C</th>
+                    <th>ADV</th>
+                    <th>PM</th>
+                    <th>MAT</th>
+                    <th>Other</th>
+                    <th>Total des votes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Sera rempli dynamiquement -->
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="visualization">
+        <h2>Visualisation des interactions</h2>
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #1f77b4;"></div>
+                <span>ED</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #ff7f0e;"></div>
+                <span>SOLV</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #2ca02c;"></div>
+                <span>SIMU</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #d62728;"></div>
+                <span>SOFT</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #9467bd;"></div>
+                <span>DATA</span>
+            </div>
+        </div>
+        <div id="graph"></div>
+    </div>
+    
+    <div class="admin-panel">
+        <h3>Administration</h3>
+        <p>Réinitialiser toutes les données :</p>
+        <input type="password" id="reset-code" placeholder="Code de réinitialisation">
+        <button id="reset-btn">Réinitialiser</button>
+    </div>
+    
+    <div id="notification" class="notification"></div>
+    
+    <script>
+        // Données et configuration
+        const teams = ["ED", "SOLV", "SIMU", "SOFT", "DATA", "B2B", "B2C", "ADV", "PM", "MAT", "Other"];
+        const teamColors = {
+            "ED": "#1f77b4", "SOLV": "#ff7f0e", "SIMU": "#2ca02c", "SOFT": "#d62728", "DATA": "#9467bd",
+            "B2B": "#8c564b", "B2C": "#e377c2", "ADV": "#7f7f7f", "PM": "#bcbd22", "MAT": "#17becf", "Other": "#f2a900"
+        };
+        let teamData = {};
+        let selectedTeam = null;
+        let selectedConnections = [];
+        
+        // Connection Socket.io
+        const socket = io();
+        
+        // Notification
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Recevoir les données initiales
+        socket.on('initial-data', (data) => {
+            teamData = data;
+            updateTable();
+            updateGraph();
+            console.log('Données initiales reçues:', data);
+        });
+        
+        // Recevoir les mises à jour
+        socket.on('data-updated', (data) => {
+            teamData = data;
+            updateTable();
+            updateGraph();
+            showNotification('Données mises à jour!');
+            console.log('Mise à jour des données:', data);
+        });
+        
+        // Sélection de l'équipe
+        function selectTeam(team) {
+            selectedTeam = team;
+            selectedConnections = [];
+            
+            // Afficher les options de connexion
+            document.getElementById('connections-selection').style.display = 'block';
+            document.getElementById('success-message').style.display = 'none';
+            
+            // Générer les options de connexion (en excluant l'équipe sélectionnée)
+            const connectionsDiv = document.getElementById('connection-options');
+            connectionsDiv.innerHTML = '';
+            
+            teams.forEach(t => {
+                if (t !== team) {
+                    const option = document.createElement('div');
+                    option.className = `option ${t}`;
+                    option.textContent = t;
+                    option.dataset.team = t;
+                    option.onclick = function() {
+                        this.classList.toggle('selected');
+                        updateSelectedConnections();
+                    };
+                    connectionsDiv.appendChild(option);
+                }
+            });
+        }
+        
+        // Mettre à jour la liste des connexions sélectionnées
+        function updateSelectedConnections() {
+            selectedConnections = [];
+            document.querySelectorAll('.option.selected').forEach(option => {
+                selectedConnections.push(option.dataset.team);
+            });
+        }
+        
+        // Soumission du formulaire
+        document.getElementById('submit').addEventListener('click', function() {
+            if (!selectedTeam) {
+                showNotification('Veuillez sélectionner votre équipe');
+                return;
+            }
+            
+            // Envoyer les données au serveur
+            fetch('/api/vote', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    team: selectedTeam,
+                    connections: selectedConnections
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Vote enregistré avec succès');
+                
+                // Réinitialiser le formulaire
+                document.querySelectorAll('.option.selected').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                
+                // Cacher les options de connexion et afficher le message de succès
+                document.getElementById('connections-selection').style.display = 'none';
+                document.getElementById('success-message').style.display = 'block';
+                
+                selectedTeam = null;
+                selectedConnections = [];
+                
+                showNotification('Vote enregistré!');
+            })
+            .catch((error) => {
+                console.error('Erreur:', error);
+                showNotification('Erreur lors de l\'envoi de votre vote');
+            });
+        });
+        
+        // Mettre à jour le tableau des connexions
+        function updateTable() {
+            const tbody = document.querySelector('#connections-table tbody');
+            tbody.innerHTML = '';
+            
+            teams.forEach(team => {
+                const row = document.createElement('tr');
+                
+                // Nom de l'équipe
+                const nameCell = document.createElement('td');
+                nameCell.textContent = team;
+                nameCell.style.fontWeight = 'bold';
+                nameCell.style.backgroundColor = teamColors[team] + '30'; // Couleur avec transparence
+                row.appendChild(nameCell);
+                
+                // Connexions avec chaque équipe
+                teams.forEach(otherTeam => {
+                    const cell = document.createElement('td');
+                    if (team === otherTeam) {
+                        cell.textContent = '-';
+                        cell.style.backgroundColor = '#f2f2f2';
+                    } else {
+                        const connections = teamData[team]?.connections[otherTeam] || 0;
+                        cell.textContent = connections;
+                        
+                        // Colorer la cellule en fonction du nombre de connexions
+                        if (connections > 0) {
+                            const intensity = Math.min(1, connections / 10); // Plafonner à 10 pour l'intensité max
+                            cell.style.backgroundColor = `rgba(76, 175, 80, ${intensity})`;
+                        }
+                    }
+                    row.appendChild(cell);
+                });
+                
+                // Total des votes
+                const totalCell = document.createElement('td');
+                totalCell.textContent = teamData[team]?.votes || 0;
+                totalCell.style.fontWeight = 'bold';
+                row.appendChild(totalCell);
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        // Initialisation du graphe
+        const width = document.getElementById('graph').clientWidth;
+        const height = document.getElementById('graph').clientHeight;
+        
+        const svg = d3.select("#graph")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+            
+
+        // Mise à jour du graphe
+        function updateGraph() {
+            // Préparer les données pour D3
+            const nodes = teams.map(team => ({
+                id: team,
+                group: teams.indexOf(team) + 1,
+                votes: teamData[team]?.votes || 0
+            }));
+            
+            const links = [];
+            let totalConnections = 0;
+
+            // Calculate the total sum of all connections
+            teams.forEach((team1) => {
+                teams.forEach((team2) => {
+                    if (team1 !== team2) {
+                        totalConnections += teamData[team1]?.connections[team2] || 0;
+                    }
+                });
+            });
+
+            teams.forEach((team1, i) => {
+                teams.forEach((team2, j) => {
+                    if (i < j) { // Avoid duplicates
+                        const value = teamData[team1]?.connections[team2] || 0;
+                        if (value > 0 && totalConnections > 0) {
+                            // Calculate the percentage based on total connections
+                            const percentage = (value / totalConnections) * 100;
+                            
+                            links.push({
+                                source: team1,
+                                target: team2,
+                                value: value,
+                                percentage: percentage
+                            });
+                        }
+                    }
+                });
+            });
+            
+            // Nettoyer le graphe existant
+            svg.selectAll("*").remove();
+            
+            // Créer la simulation
+            const width = 1200;
+            const height = 800;
+            const simulation = d3.forceSimulation(nodes)
+                .force("link", d3.forceLink(links).id(d => d.id).distance(350)) // More space between bubbles
+                .force("charge", d3.forceManyBody().strength(-800)) // Increase repulsion
+                .force("center", d3.forceCenter(width / 2, height / 2));
+            
+            // Dessiner les liens avec épaisseur basée sur le pourcentage
+            const link = svg.append("g")
+                .attr("stroke", "#999")
+                .attr("stroke-opacity", 0.6)
+                .selectAll("line")
+                .data(links)
+                .join("line")
+                .attr("stroke-width", d => Math.max(1, d.percentage * 5)); // 100% serait une épaisseur de 20
+            
+            // Ajouter le nombre d'interactions et le pourcentage sur les liens
+            const linkLabels = svg.append("g")
+                .selectAll(".link-label")
+                .data(links)
+                .join("text")
+                .attr("class", "link-label")
+                .attr("text-anchor", "middle")
+                .attr("dy", -5)
+                .style("font-size", "10px")
+                .style("fill", "#333")
+                .style("font-weight", "bold")
+                .style("background", "white")
+                .style("padding", "2px");
+            
+            // Dessiner les nœuds
+            const node = svg.append("g")
+                .attr("stroke", "#fff")
+                .attr("stroke-width", 1.5)
+                .selectAll("g")
+                .data(nodes)
+                .join("g");
+            
+            // Cercles pour les nœuds
+            node.append("circle")
+                .attr("r", d => 30 + Math.sqrt(d.votes) * 6) // Larger bubbles            
+                .attr("fill", d => teamColors[d.id]);
+            
+            // Texte pour les nœuds
+            node.append("text")
+                .attr("text-anchor", "middle")
+                .attr("dy", ".35em")
+                .attr("fill", "white")
+                .attr("font-weight", "bold")
+                .text(d => d.id);
+            
+            // Valeurs au-dessus des nœuds
+            node.append("text")
+                .attr("text-anchor", "middle")
+                .attr("dy", -25)
+                .text(d => d.votes > 0 ? `${d.votes} votes` : "");
+            
+            // Animation de la simulation
+            simulation.on("tick", () => {
+                link
+                    .attr("x1", d => d.source.x)
+                    .attr("y1", d => d.source.y)
+                    .attr("x2", d => d.target.x)
+                    .attr("y2", d => d.target.y);
+                
+                node.attr("transform", d => `translate(${d.x},${d.y})`);
+                
+                // Mettre à jour le texte des liens
+                linkLabels
+                    .attr("x", d => (d.source.x + d.target.x) / 2)
+                    .attr("y", d => (d.source.y + d.target.y) / 2)
+                    .text(d => `${d.value} (${d.percentage.toFixed(1)}%)`);
+            });
+            
+            // Fonction de glisser-déposer
+            node.call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended));
+            
+            function dragstarted(event) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                event.subject.fx = event.subject.x;
+                event.subject.fy = event.subject.y;
+            }
+            
+            function dragged(event) {
+                event.subject.fx = event.x;
+                event.subject.fy = event.y;
+            }
+            
+            function dragended(event) {
+                if (!event.active) simulation.alphaTarget(0);
+                event.subject.fx = null;
+                event.subject.fy = null;
+            }
+        }
+        
+        // Fonction de réinitialisation (admin)
+        document.getElementById('reset-btn').addEventListener('click', function() {
+            const resetCode = document.getElementById('reset-code').value;
+            
+            if (!resetCode) {
+                showNotification('Veuillez entrer le code de réinitialisation');
+                return;
+            }
+            
+            fetch('/api/reset', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ resetCode }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Données réinitialisées avec succès');
+                    document.getElementById('reset-code').value = '';
+                } else {
+                    showNotification('Erreur: ' + data.error);
+                }
+            })
+            .catch(error => {
+                showNotification('Erreur lors de la réinitialisation');
+                console.error('Erreur:', error);
+            });
+        });
+    </script>
+</body>
+</html>
