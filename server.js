@@ -15,18 +15,31 @@ app.use(express.json());
 
 // Structure de données pour stocker les votes par équipe
 let teamData = {
-  "ED": { votes: 0, connections: { "SOLV": 0, "SIMU": 0, "SOFT": 0, "DATA": 0, "B2B": 0, "B2C": 0, "ADV": 0, "PM": 0, "MAT": 0, "Other": 0 } },
-  "SOLV": { votes: 0, connections: { "ED": 0, "SIMU": 0, "SOFT": 0, "DATA": 0, "B2B": 0, "B2C": 0, "ADV": 0, "PM": 0, "MAT": 0, "Other": 0 } },
-  "SIMU": { votes: 0, connections: { "ED": 0, "SOLV": 0, "SOFT": 0, "DATA": 0, "B2B": 0, "B2C": 0, "ADV": 0, "PM": 0, "MAT": 0, "Other": 0 } },
-  "SOFT": { votes: 0, connections: { "ED": 0, "SOLV": 0, "SIMU": 0, "DATA": 0, "B2B": 0, "B2C": 0, "ADV": 0, "PM": 0, "MAT": 0, "Other": 0 } },
-  "DATA": { votes: 0, connections: { "ED": 0, "SOLV": 0, "SIMU": 0, "SOFT": 0, "B2B": 0, "B2C": 0, "ADV": 0, "PM": 0, "MAT": 0, "Other": 0 } },
-  "B2B": { votes: 0, connections: { "ED": 0, "SOLV": 0, "SIMU": 0, "SOFT": 0, "DATA": 0, "B2C": 0, "ADV": 0, "PM": 0, "MAT": 0, "Other": 0 } },
-  "B2C": { votes: 0, connections: { "ED": 0, "SOLV": 0, "SIMU": 0, "SOFT": 0, "DATA": 0, "B2B": 0, "ADV": 0, "PM": 0, "MAT": 0, "Other": 0 } },
-  "ADV": { votes: 0, connections: { "ED": 0, "SOLV": 0, "SIMU": 0, "SOFT": 0, "DATA": 0, "B2B": 0, "B2C": 0, "PM": 0, "MAT": 0, "Other": 0 } },
-  "PM": { votes: 0, connections: { "ED": 0, "SOLV": 0, "SIMU": 0, "SOFT": 0, "DATA": 0, "B2B": 0, "B2C": 0, "ADV": 0, "MAT": 0, "Other": 0 } },
-  "MAT": { votes: 0, connections: { "ED": 0, "SOLV": 0, "SIMU": 0, "SOFT": 0, "DATA": 0, "B2B": 0, "B2C": 0, "ADV": 0, "PM": 0, "Other": 0 } },
-  "Other": { votes: 0, connections: { "ED": 0, "SOLV": 0, "SIMU": 0, "SOFT": 0, "DATA": 0, "B2B": 0, "B2C": 0, "ADV": 0, "PM": 0, "MAT": 0 } }
+  "ED":    { votes: 0, connections: {} },
+  "SOLV":  { votes: 0, connections: {} },
+  "SIMU":  { votes: 0, connections: {} },
+  "SOFT":  { votes: 0, connections: {} },
+  "DATA":  { votes: 0, connections: {} },
+  "B2B":   { votes: 0, connections: {} },
+  "B2C":   { votes: 0, connections: {} },
+  "ADV":   { votes: 0, connections: {} },
+  "PM":    { votes: 0, connections: {} },
+  "MAT":   { votes: 0, connections: {} },
+  "DOTI/BS": { votes: 0, connections: {} },
+  "DOTI/IN": { votes: 0, connections: {} },
+  "DOMF":    { votes: 0, connections: {} },
+  "Others":   { votes: 0, connections: {} }
 };
+
+// Initialize connections for each team
+let teams = Object.keys(teamData);
+teams.forEach(team => {
+  teams.forEach(connection => {
+    if (team !== connection) {
+      teamData[team].connections[connection] = 0;
+    }
+  });
+});
 
 // Charger les données existantes si disponibles
 try {
@@ -87,18 +100,31 @@ app.post('/api/reset', (req, res) => {
   
   // Réinitialiser les données
   let teamData = {
-    "ED": { votes: 0, connections: { "SOLV": 0, "SIMU": 0, "SOFT": 0, "DATA": 0, "B2B": 0, "B2C": 0, "ADV": 0, "PM": 0, "MAT": 0, "Other": 0 } },
-    "SOLV": { votes: 0, connections: { "ED": 0, "SIMU": 0, "SOFT": 0, "DATA": 0, "B2B": 0, "B2C": 0, "ADV": 0, "PM": 0, "MAT": 0, "Other": 0 } },
-    "SIMU": { votes: 0, connections: { "ED": 0, "SOLV": 0, "SOFT": 0, "DATA": 0, "B2B": 0, "B2C": 0, "ADV": 0, "PM": 0, "MAT": 0, "Other": 0 } },
-    "SOFT": { votes: 0, connections: { "ED": 0, "SOLV": 0, "SIMU": 0, "DATA": 0, "B2B": 0, "B2C": 0, "ADV": 0, "PM": 0, "MAT": 0, "Other": 0 } },
-    "DATA": { votes: 0, connections: { "ED": 0, "SOLV": 0, "SIMU": 0, "SOFT": 0, "B2B": 0, "B2C": 0, "ADV": 0, "PM": 0, "MAT": 0, "Other": 0 } },
-    "B2B": { votes: 0, connections: { "ED": 0, "SOLV": 0, "SIMU": 0, "SOFT": 0, "DATA": 0, "B2C": 0, "ADV": 0, "PM": 0, "MAT": 0, "Other": 0 } },
-    "B2C": { votes: 0, connections: { "ED": 0, "SOLV": 0, "SIMU": 0, "SOFT": 0, "DATA": 0, "B2B": 0, "ADV": 0, "PM": 0, "MAT": 0, "Other": 0 } },
-    "ADV": { votes: 0, connections: { "ED": 0, "SOLV": 0, "SIMU": 0, "SOFT": 0, "DATA": 0, "B2B": 0, "B2C": 0, "PM": 0, "MAT": 0, "Other": 0 } },
-    "PM": { votes: 0, connections: { "ED": 0, "SOLV": 0, "SIMU": 0, "SOFT": 0, "DATA": 0, "B2B": 0, "B2C": 0, "ADV": 0, "MAT": 0, "Other": 0 } },
-    "MAT": { votes: 0, connections: { "ED": 0, "SOLV": 0, "SIMU": 0, "SOFT": 0, "DATA": 0, "B2B": 0, "B2C": 0, "ADV": 0, "PM": 0, "Other": 0 } },
-    "Other": { votes: 0, connections: { "ED": 0, "SOLV": 0, "SIMU": 0, "SOFT": 0, "DATA": 0, "B2B": 0, "B2C": 0, "ADV": 0, "PM": 0, "MAT": 0 } }
+    "ED":    { votes: 0, connections: {} },
+    "SOLV":  { votes: 0, connections: {} },
+    "SIMU":  { votes: 0, connections: {} },
+    "SOFT":  { votes: 0, connections: {} },
+    "DATA":  { votes: 0, connections: {} },
+    "B2B":   { votes: 0, connections: {} },
+    "B2C":   { votes: 0, connections: {} },
+    "ADV":   { votes: 0, connections: {} },
+    "PM":    { votes: 0, connections: {} },
+    "MAT":   { votes: 0, connections: {} },
+    "DOTI/BS": { votes: 0, connections: {} },
+    "DOTI/IN": { votes: 0, connections: {} },
+    "DOMF":    { votes: 0, connections: {} },
+    "Others":   { votes: 0, connections: {} }
   };
+  
+  // Initialize connections for each team
+  let teams = Object.keys(teamData);
+  teams.forEach(team => {
+    teams.forEach(connection => {
+      if (team !== connection) {
+        teamData[team].connections[connection] = 0;
+      }
+    });
+  });
   
   saveData();
 

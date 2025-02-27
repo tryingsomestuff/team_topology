@@ -167,10 +167,10 @@
     <h1>Interactions entre équipes</h1>
     
     <div class="survey-form">
-        <h2>Avec quelles équipes discutez-vous au moins une fois par semaine?</h2>
+        <h2>Avec quelles équipes discutez-vous au moins une fois par semaine (minimum 2h)?</h2>
         
         <div class="team-selection">
-            <p><strong>1. Sélectionnez VOTRE équipe :</strong></p>
+            <p><strong>1. Sélectionnez VOTRE équipe à SIM:</strong></p>
             <div class="team-options">
                 <div class="team-btn ED" onclick="selectTeam('ED')">ED</div>
                 <div class="team-btn SOLV" onclick="selectTeam('SOLV')">SOLV</div>
@@ -210,7 +210,10 @@
                     <th>ADV</th>
                     <th>PM</th>
                     <th>MAT</th>
-                    <th>Other</th>
+                    <th>DOTI/BS</th>
+                    <th>DOTI/IN</th>
+                    <th>DOMF</th>
+                    <th>Others</th>
                     <th>Total des votes</th>
                 </tr>
             </thead>
@@ -258,10 +261,11 @@
     
     <script>
         // Données et configuration
-        const teams = ["ED", "SOLV", "SIMU", "SOFT", "DATA", "B2B", "B2C", "ADV", "PM", "MAT", "Other"];
+        const teams = ["ED", "SOLV", "SIMU", "SOFT", "DATA", "B2B", "B2C", "ADV", "PM", "MAT", "DOTI/BS", "DOTI/IN", "DOMF", "Others"];
         const teamColors = {
-            "ED": "#1f77b4", "SOLV": "#ff7f0e", "SIMU": "#2ca02c", "SOFT": "#d62728", "DATA": "#9467bd",
-            "B2B": "#8c564b", "B2C": "#e377c2", "ADV": "#7f7f7f", "PM": "#bcbd22", "MAT": "#17becf", "Other": "#f2a900"
+                        "ED": "#1f77b4", "SOLV": "#ff7f0e", "SIMU": "#2ca02c", "SOFT": "#d62728", "DATA": "#9467bd",
+                        "B2B": "#7a6b64", "B2C": "#a0939f", "ADV": "#8c8c8c", "PM": "#9c9d79", "MAT": "#6d98a1", 
+                        "DOTI/BS": "#827b72", "DOTI/IN": "#7b8691", "DOMF": "#9a8c99", "Others": "#b8a58b"
         };
         let teamData = {};
         let selectedTeam = null;
@@ -477,7 +481,7 @@
             const width = 1200;
             const height = 800;
             const simulation = d3.forceSimulation(nodes)
-                .force("link", d3.forceLink(links).id(d => d.id).distance(350)) // More space between bubbles
+                .force("link", d3.forceLink(links).id(d => d.id).distance(300)) // More space between bubbles
                 .force("charge", d3.forceManyBody().strength(-800)) // Increase repulsion
                 .force("center", d3.forceCenter(width / 2, height / 2));
             
@@ -488,7 +492,7 @@
                 .selectAll("line")
                 .data(links)
                 .join("line")
-                .attr("stroke-width", d => Math.max(1, d.percentage * 5)); // 100% serait une épaisseur de 20
+                .attr("stroke-width", d => Math.max(1, d.percentage * 4)); // 100% serait une épaisseur de 20
             
             // Ajouter le nombre d'interactions et le pourcentage sur les liens
             const linkLabels = svg.append("g")
@@ -514,7 +518,7 @@
             
             // Cercles pour les nœuds
             node.append("circle")
-                .attr("r", d => 30 + Math.sqrt(d.votes) * 6) // Larger bubbles            
+                .attr("r", d => 40 + Math.sqrt(d.votes) * 6) // Larger bubbles            
                 .attr("fill", d => teamColors[d.id]);
             
             // Texte pour les nœuds
@@ -529,7 +533,7 @@
             node.append("text")
                 .attr("text-anchor", "middle")
                 .attr("dy", -25)
-                .text(d => d.votes > 0 ? `${d.votes} votes` : "");
+                //.text(d => d.votes > 0 ? `${d.votes} votes` : "");
             
             // Animation de la simulation
             simulation.on("tick", () => {
