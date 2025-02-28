@@ -161,6 +161,11 @@
             font-size: 18px;
             display: none;
         }
+        @media (max-width: 999px) {
+           #content-container {
+            display: none;
+           }
+        }        
     </style>
 </head>
 <body>
@@ -194,72 +199,75 @@
         </div>
     </div>
     
-    <div class="stats">
-        <h2>Résultats des interactions</h2>
-        <table id="connections-table">
-            <thead>
-                <tr>
-                    <th>Équipe</th>
-                    <th>ED</th>
-                    <th>SOLV</th>
-                    <th>SIMU</th>
-                    <th>SOFT</th>
-                    <th>DATA</th>
-                    <th>B2B</th>
-                    <th>B2C</th>
-                    <th>ADV</th>
-                    <th>PM</th>
-                    <th>MAT</th>
-                    <th>DOTI/BS</th>
-                    <th>DOTI/IN</th>
-                    <th>DOMF</th>
-                    <th>Others</th>
-                    <th>Total des votes</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Sera rempli dynamiquement -->
-            </tbody>
-        </table>
-    </div>
-    
-    <div class="visualization">
-        <h2>Visualisation des interactions</h2>
-        <div class="legend">
-            <div class="legend-item">
-                <div class="legend-color" style="background-color: #1f77b4;"></div>
-                <span>ED</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background-color: #ff7f0e;"></div>
-                <span>SOLV</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background-color: #2ca02c;"></div>
-                <span>SIMU</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background-color: #d62728;"></div>
-                <span>SOFT</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background-color: #9467bd;"></div>
-                <span>DATA</span>
-            </div>
+    <div id="content-container">
+        <div class="stats">
+            <h2>Résultats des interactions</h2>
+            <table id="connections-table">
+                <thead>
+                    <tr>
+                        <th>Équipe</th>
+                        <th>ED</th>
+                        <th>SOLV</th>
+                        <th>SIMU</th>
+                        <th>SOFT</th>
+                        <th>DATA</th>
+                        <th>B2B</th>
+                        <th>B2C</th>
+                        <th>ADV</th>
+                        <th>PM</th>
+                        <th>MAT</th>
+                        <th>DOTI/BS</th>
+                        <th>DOTI/IN</th>
+                        <th>DOMF</th>
+                        <th>Others</th>
+                        <th>Total des votes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Sera rempli dynamiquement -->
+                </tbody>
+            </table>
         </div>
-        <div id="graph"></div>
-    </div>
-    
-    <div class="admin-panel">
-        <h3>Administration</h3>
-        <p>Réinitialiser toutes les données :</p>
-        <input type="password" id="reset-code" placeholder="Code de réinitialisation">
-        <button id="reset-btn">Réinitialiser</button>
+        
+        <div class="visualization">
+            <h2>Visualisation des interactions</h2>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #1f77b4;"></div>
+                    <span>ED</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #ff7f0e;"></div>
+                    <span>SOLV</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #2ca02c;"></div>
+                    <span>SIMU</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #d62728;"></div>
+                    <span>SOFT</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #9467bd;"></div>
+                    <span>DATA</span>
+                </div>
+            </div>
+            <div id="graph"></div>
+        </div>
+        
+        <div class="admin-panel">
+            <h3>Administration</h3>
+            <p>Réinitialiser toutes les données :</p>
+            <input type="password" id="reset-code" placeholder="Code de réinitialisation">
+            <button id="reset-btn">Réinitialiser</button>
+        </div>
     </div>
     
     <div id="notification" class="notification"></div>
     
     <script>
+
         // Données et configuration
         const teams = ["ED", "SOLV", "SIMU", "SOFT", "DATA", "B2B", "B2C", "ADV", "PM", "MAT", "DOTI/BS", "DOTI/IN", "DOMF", "Others"];
         const teamColors = {
