@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 TEAM_LIST_FROM=("ED" "SOLV" "SIMU" "SOFT" "DATA")
-TEAM_LIST=("ED" "SOLV" "SIMU" "SOFT" "DATA" "B2B" "B2C" "ADV" "PM" "MAT" "DOTI/BS" "DOTI/IN" "DOMF" "Others")
+TEAM_LIST=("ED" "SOLV" "SIMU" "SOFT" "DATA" "SIM/US" "SIM/IND" "B2B" "B2C" "ADV" "PM" "MAT" "DOTI/BS" "DOTI/IN" "DOMF" "Others")
 
 # Select a random team
 SELECTED_TEAM=${TEAM_LIST_FROM[$RANDOM % ${#TEAM_LIST_FROM[@]}]}
