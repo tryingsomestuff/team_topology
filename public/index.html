@@ -84,7 +84,7 @@
         .SIMU { background-color: #2ca02c; color: white; }
         .SOFT { background-color: #d62728; color: white; }
         .DATA { background-color: #9467bd; color: white; }
-        .SIM\/US, .SIM\/IND, .B2B, .B2C, .ADV, .PM, .MAT, .DOMF, .DOTI\/BS, .DOTI\/IN, .Others {
+        .SIM\/US, .SIM\/IND, .B2B, .B2C, .ADV, .PM, .MAT, .DOMF, .DOTI\/BS, .DOTI\/IN, .GST, .Others {
             background-color: #9e9c9c;
             color: #ffffff;
             font-weight: slim;
@@ -226,6 +226,7 @@
                         <th>DOTI/BS</th>
                         <th>DOTI/IN</th>
                         <th>DOMF</th>
+                        <th>GST</th>
                         <th>Others</th>
                         <th>Total des votes</th>
                     </tr>
@@ -276,11 +277,11 @@
     <script>
 
         // Données et configuration
-        const teams = ["ED", "SOLV", "SIMU", "SOFT", "DATA", "SIM/US", "SIM/IND", "B2B", "B2C", "ADV", "PM", "MAT", "DOTI/BS", "DOTI/IN", "DOMF", "Others"];
+        const teams = ["ED", "SOLV", "SIMU", "SOFT", "DATA", "SIM/US", "SIM/IND", "B2B", "B2C", "ADV", "PM", "MAT", "DOTI/BS", "DOTI/IN", "DOMF", "GST", "Others"];
         const teamColors = {
                         "ED": "#1f77b4", "SOLV": "#ff7f0e", "SIMU": "#2ca02c", "SOFT": "#d62728", "DATA": "#9467bd",
-                        "SIM/US": "#a0939f", "SIM/IND": "#827b72", "B2B": "#7a6b64", "B2C": "#a0939f", "ADV": "#8c8c8c", "PM": "#9c9d79", "MAT": "#6d98a1", 
-                        "DOTI/BS": "#827b72", "DOTI/IN": "#7b8691", "DOMF": "#9a8c99", "Others": "#b8a58b"
+                        "SIM/US": "#a0939f", "SIM/IND": "#827b72", "B2B": "#a0939f", "B2C": "#827b72", "ADV": "#a0939f", "PM": "#827b72", "MAT": "#a0939f", 
+                        "DOTI/BS": "#827b72", "DOTI/IN": "#a0939f", "DOMF": "#827b72", "GST": "#a0939f", "Others": "#827b72"
         };
         let teamData = {};
         let selectedTeam = null;
@@ -497,7 +498,7 @@
             const height = 800;
             const simulation = d3.forceSimulation(nodes)
                 .force("link", d3.forceLink(links).id(d => d.id).distance(300)) // More space between bubbles
-                .force("charge", d3.forceManyBody().strength(-1200)) // Increase repulsion
+                .force("charge", d3.forceManyBody().strength(-1000)) // Increase repulsion
                 //.force("radial", d3.forceRadial(900, width / 2, height / 2)) // Circular layout
                 .force("center", d3.forceCenter(width / 2, height / 2));
             

@@ -30,6 +30,7 @@ let teamData = {
   "DOTI/BS": { votes: 0, connections: {} },
   "DOTI/IN": { votes: 0, connections: {} },
   "DOMF":    { votes: 0, connections: {} },
+  "GST":    { votes: 0, connections: {} },
   "Others":   { votes: 0, connections: {} }
 };
 
@@ -117,6 +118,7 @@ app.post('/api/reset', (req, res) => {
     "DOTI/BS": { votes: 0, connections: {} },
     "DOTI/IN": { votes: 0, connections: {} },
     "DOMF":    { votes: 0, connections: {} },
+    "GST":    { votes: 0, connections: {} },
     "Others":   { votes: 0, connections: {} }
   };
   
